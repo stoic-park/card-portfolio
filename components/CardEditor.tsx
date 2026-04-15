@@ -140,23 +140,40 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
         )}
 
         {/* Text preview */}
-        <div className="relative z-10 flex h-full flex-col justify-between p-6" style={{ fontFamily: t.fontSans }}>
-          <div>
-            <div
-              className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em]"
-              style={{ color: face.muted }}
-            >
-              <span style={{ color: face.accent }}>●</span>
-              <span>Portfolio Card · {t.label}</span>
+        {side === "front" ? (
+          <div className="relative z-10 flex h-full flex-col justify-between p-6" style={{ fontFamily: t.fontSans }}>
+            <div>
+              <div
+                className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em]"
+                style={{ color: face.muted }}
+              >
+                <span style={{ color: face.accent }}>●</span>
+                <span>Portfolio Card · {t.label}</span>
+              </div>
+              <h2 className="mt-3 text-3xl font-bold">{profile.name || "Name"}</h2>
+              <p className="mt-1 text-sm" style={{ color: face.muted }}>{profile.nameEn}</p>
             </div>
-            <h2 className="mt-3 text-3xl font-bold">{profile.name || "Name"}</h2>
-            <p className="mt-1 text-sm" style={{ color: face.muted }}>{profile.nameEn}</p>
+            <div>
+              <p className="text-base font-semibold" style={{ color: face.accent }}>{profile.title}</p>
+              <p className="mt-1 text-xs" style={{ color: face.muted }}>{profile.tagline}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-base font-semibold" style={{ color: face.accent }}>{profile.title}</p>
-            <p className="mt-1 text-xs" style={{ color: face.muted }}>{profile.tagline}</p>
+        ) : (
+          <div className="relative z-10 flex h-full items-center gap-4 p-5" style={{ fontFamily: t.fontSans }}>
+            <div
+              className="shrink-0 flex h-[110px] w-[110px] items-center justify-center rounded-lg text-[10px]"
+              style={{ background: t.card.qrBg, color: "#999" }}
+            >
+              QR
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: face.muted }}>Scan or tap</div>
+              <p className="mt-1 truncate text-sm font-semibold">{profile.email || "email@example.com"}</p>
+              <p className="truncate text-xs" style={{ color: face.muted }}>{profile.github.replace(/^https?:\/\//, "")}</p>
+              <p className="truncate text-xs" style={{ color: face.muted }}>{profile.blog.replace(/^https?:\/\//, "")}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Scale handle */}
         {hasImage && (
