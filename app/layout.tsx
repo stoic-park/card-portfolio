@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { profile } from "@/lib/profile";
+
+const title = "Card Portfolio Studio";
+const description = "마크다운 이력서를 명함 + 포트폴리오 사이트로. 원클릭 배포.";
 
 export const metadata: Metadata = {
-  title: `${profile.name} — ${profile.title}`,
-  description: profile.tagline,
-  openGraph: {
-    title: `${profile.name} — ${profile.title}`,
-    description: profile.tagline,
-    type: "website",
-  },
+  title,
+  description,
+  openGraph: { title, description, type: "website" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
