@@ -11,7 +11,7 @@ import { PortfolioView } from "./PortfolioView";
 import { DeployPanel } from "./DeployPanel";
 import { CardCustomizer } from "./CardCustomizer";
 import { defaultProfile } from "@/lib/profile";
-import { emptyProfile, type Profile } from "@/lib/schema";
+import { emptyProfile, type Profile, type Experience, type Project } from "@/lib/schema";
 import { parseMarkdownToProfile } from "@/lib/parse-markdown";
 import { loadProfile, saveProfile, loadTheme, saveTheme } from "@/lib/storage";
 import { resolveQrUrl } from "@/lib/qr-target";
@@ -208,7 +208,14 @@ export function Studio() {
                 <Field label="Skills (쉼표 구분)">
                   <input value={skillsCsv} onChange={(e) => setProfile({ ...profile, skills: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} className="input" />
                 </Field>
-                <p className="text-xs text-neutral-500">경력·프로젝트 항목은 Markdown 탭에서 편집하세요.</p>
+                <ExperienceListEditor
+                  items={profile.experience}
+                  onChange={(experience) => setProfile({ ...profile, experience })}
+                />
+                <ProjectListEditor
+                  items={profile.projects}
+                  onChange={(projects) => setProfile({ ...profile, projects })}
+                />
               </div>
             )}
 
@@ -306,5 +313,110 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1 block text-xs font-medium text-neutral-500">{label}</span>
       {children}
     </label>
+  );
+}
+
+function move<T>(arr: T[], from: number, to: number): T[] {
+  if (to < 0 || to >= arr.length) return arr;
+  const next = [...arr];
+  const [m] = next.splice(from, 1);
+  next.splice(to, 0, m);
+  return next;
+}
+
+function RowControls({ onUp, onDown, onDelete }: { onUp: () => void; onDown: () => void; onDelete: () => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      <button type="button" onClick={onUp} aria-label="위로" className="h-7 w-7 rounded border border-neutral-200 text-xs hover:bg-neutral-50">↑</button>
+      <button type="button" onClick={onDown} aria-label="아래로" className="h-7 w-7 rounded border border-neutral-200 text-xs hover:bg-neutral-50">↓</button>
+      <button type="button" onClick={onDelete} aria-label="삭제" className="h-7 w-7 rounded border border-red-200 text-xs text-red-600 hover:bg-red-50">✕</button>
+    </div>
+  );
+}
+
+function ExperienceListEditor({ items, onChange }: { items: Experience[]; onChange: (next: Experience[]) => void }) {
+  const update = (i: number, patch: Partial<Experience>) => {
+    const next = items.map((x, idx) => (idx === i ? { ...x, ...patch } : x));
+    onChange(next);
+  };
+  const add = () => onChange([...items, { company: "", role: "", period: "", desc: "" }]);
+  return (
+    <section className="space-y-3 border-t border-neutral-200 pt-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">경력 ({items.length})</h3>
+        <button type="button" onClick={add} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">+ 추가</button>
+      </div>
+      {items.length === 0 && (
+        <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
+      )}
+      {items.map((exp, i) => (
+        <div key={i} className="rounded-md border border-neutral-200 bg-white p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-neutral-400">#{i + 1}</span>
+            <RowControls
+              onUp={() => onChange(move(items, i, i - 1))}
+              onDown={() => onChange(move(items, i, i + 1))}
+              onDelete={() => onChange(items.filter((_, idx) => idx !== i))}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Field label="회사"><input className="input" value={exp.company} onChange={(e) => update(i, { company: e.target.value })} /></Field>
+            <Field label="직무"><input className="input" value={exp.role} onChange={(e) => update(i, { role: e.target.value })} /></Field>
+          </div>
+          <Field label="기간"><input className="input" value={exp.period} onChange={(e) => update(i, { period: e.target.value })} placeholder="2024 ~ 재직중" /></Field>
+          <Field label="설명"><textarea className="input min-h-[60px]" value={exp.desc} onChange={(e) => update(i, { desc: e.target.value })} /></Field>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function ProjectListEditor({ items, onChange }: { items: Project[]; onChange: (next: Project[]) => void }) {
+  const update = (i: number, patch: Partial<Project>) => {
+    const next = items.map((x, idx) => (idx === i ? { ...x, ...patch } : x));
+    onChange(next);
+  };
+  const add = () => onChange([...items, { name: "", org: "", period: "", stack: [], highlights: [] }]);
+  return (
+    <section className="space-y-3 border-t border-neutral-200 pt-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">프로젝트 ({items.length})</h3>
+        <button type="button" onClick={add} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">+ 추가</button>
+      </div>
+      {items.length === 0 && (
+        <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
+      )}
+      {items.map((proj, i) => (
+        <div key={i} className="rounded-md border border-neutral-200 bg-white p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-neutral-400">#{i + 1}</span>
+            <RowControls
+              onUp={() => onChange(move(items, i, i - 1))}
+              onDown={() => onChange(move(items, i, i + 1))}
+              onDelete={() => onChange(items.filter((_, idx) => idx !== i))}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Field label="이름"><input className="input" value={proj.name} onChange={(e) => update(i, { name: e.target.value })} /></Field>
+            <Field label="소속/조직"><input className="input" value={proj.org} onChange={(e) => update(i, { org: e.target.value })} /></Field>
+          </div>
+          <Field label="기간"><input className="input" value={proj.period} onChange={(e) => update(i, { period: e.target.value })} /></Field>
+          <Field label="스택 (쉼표 구분)">
+            <input
+              className="input"
+              value={proj.stack.join(", ")}
+              onChange={(e) => update(i, { stack: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+            />
+          </Field>
+          <Field label="Highlights (줄바꿈 = 항목)">
+            <textarea
+              className="input min-h-[80px]"
+              value={proj.highlights.join("\n")}
+              onChange={(e) => update(i, { highlights: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
+            />
+          </Field>
+        </div>
+      ))}
+    </section>
   );
 }
