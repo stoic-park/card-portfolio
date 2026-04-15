@@ -18,7 +18,33 @@ type DeploymentResponse = {
   url?: string;
   id?: string;
   alias?: string[];
+  readyState?: string;
+  status?: string;
 };
+
+async function waitForReady(
+  token: string,
+  teamId: string | undefined,
+  id: string,
+  timeoutMs = 90_000
+): Promise<DeploymentResponse> {
+  const qs = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
+  const started = Date.now();
+  let last: DeploymentResponse = {};
+  while (Date.now() - started < timeoutMs) {
+    const res = await fetch(`https://api.vercel.com/v13/deployments/${id}${qs}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      last = (await res.json()) as DeploymentResponse;
+      const state = last.readyState ?? last.status;
+      if (state === "READY") return last;
+      if (state === "ERROR" || state === "CANCELED") return last;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  return last;
+}
 
 function slugify(s: string): string {
   return (s || "card")
@@ -64,13 +90,18 @@ async function deployOnce(
   return { ok: true, data: json as DeploymentResponse };
 }
 
-function pickPublicUrl(data: DeploymentResponse): string | null {
+function pickPublicUrl(data: DeploymentResponse, projectName?: string): string | null {
   const aliases = (data.alias ?? []).filter((a) => typeof a === "string" && a.length > 0);
-  // Prefer the shortest alias (usually `{project}.vercel.app` when available)
-  if (aliases.length > 0) {
-    const shortest = aliases.slice().sort((a, b) => a.length - b.length)[0];
+  // Deployment-specific URLs contain a long alphanumeric hash segment between the
+  // project name and the team slug. Production aliases do not. Prefer the latter.
+  const looksLikeDeploymentUrl = (a: string) => /-[a-z0-9]{9,}-/i.test(a);
+  const stable = aliases.filter((a) => !looksLikeDeploymentUrl(a));
+  const pool = stable.length > 0 ? stable : aliases;
+  if (pool.length > 0) {
+    const shortest = pool.slice().sort((a, b) => a.length - b.length)[0];
     return `https://${shortest}`;
   }
+  if (projectName) return `https://${projectName}.vercel.app`;
   return data.url ? `https://${data.url}` : null;
 }
 
@@ -102,7 +133,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: first.error, code: first.code }, { status: first.status });
   }
 
-  const realUrl = pickPublicUrl(first.data);
+  // Wait until Phase 1 is READY so Vercel populates the production alias
+  let ready: DeploymentResponse = first.data;
+  if (first.data.id) {
+    ready = await waitForReady(token, teamId, first.data.id);
+  }
+  const merged: DeploymentResponse = {
+    ...first.data,
+    ...ready,
+    alias: [
+      ...new Set([...(first.data.alias ?? []), ...(ready.alias ?? [])]),
+    ],
+  };
+
+  const realUrl = pickPublicUrl(merged, name);
   if (!realUrl) {
     // Couldn't resolve a URL — fall back to returning phase-1 deployment as-is
     return NextResponse.json({
@@ -135,7 +179,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const finalUrl = pickPublicUrl(second.data) ?? realUrl;
+  const finalUrl = pickPublicUrl(second.data, name) ?? realUrl;
   return NextResponse.json({
     url: finalUrl,
     id: second.data.id ?? null,
