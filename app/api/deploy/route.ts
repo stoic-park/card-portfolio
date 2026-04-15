@@ -14,6 +14,12 @@ type Body = {
   qrUrl?: string;
 };
 
+type DeploymentResponse = {
+  url?: string;
+  id?: string;
+  alias?: string[];
+};
+
 function slugify(s: string): string {
   return (s || "card")
     .toLowerCase()
@@ -21,6 +27,51 @@ function slugify(s: string): string {
     .trim()
     .replace(/\s+/g, "-")
     .slice(0, 52) || "card";
+}
+
+async function deployOnce(
+  token: string,
+  teamId: string | undefined,
+  name: string,
+  files: Record<string, string>
+): Promise<{ ok: true; data: DeploymentResponse } | { ok: false; status: number; error: string; code?: string }> {
+  const payload = {
+    name,
+    files: Object.entries(files).map(([file, data]) => ({
+      file,
+      data: Buffer.from(data, "utf-8").toString("base64"),
+      encoding: "base64",
+    })),
+    projectSettings: { framework: null },
+    target: "production",
+  };
+  const qs = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
+  const res = await fetch(`https://api.vercel.com/v13/deployments${qs}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json: unknown = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = json as { error?: { message?: string; code?: string } };
+    return {
+      ok: false,
+      status: res.status,
+      error: err?.error?.message ?? `Vercel API error ${res.status}`,
+      code: err?.error?.code,
+    };
+  }
+  return { ok: true, data: json as DeploymentResponse };
+}
+
+function pickPublicUrl(data: DeploymentResponse): string | null {
+  const aliases = (data.alias ?? []).filter((a) => typeof a === "string" && a.length > 0);
+  // Prefer the shortest alias (usually `{project}.vercel.app` when available)
+  if (aliases.length > 0) {
+    const shortest = aliases.slice().sort((a, b) => a.length - b.length)[0];
+    return `https://${shortest}`;
+  }
+  return data.url ? `https://${data.url}` : null;
 }
 
 export async function POST(req: Request) {
@@ -36,46 +87,59 @@ export async function POST(req: Request) {
   if (!profile) return NextResponse.json({ error: "Missing profile" }, { status: 400 });
 
   const name = slugify(body.projectName || profile.name || "card");
-  const qrUrl = body.qrUrl || "#resume";
 
-  let files: Record<string, string>;
+  // Phase 1 — deploy with placeholder QR target to learn the real URL
+  const placeholderQr = "https://vercel.com";
+  let phase1Files: Record<string, string>;
   try {
-    files = await generateSite(profile, themeId, qrUrl);
+    phase1Files = await generateSite(profile, themeId, placeholderQr);
   } catch (e) {
     return NextResponse.json({ error: `Failed to generate site: ${String(e)}` }, { status: 500 });
   }
 
-  const payload = {
-    name,
-    files: Object.entries(files).map(([file, data]) => ({
-      file,
-      data: Buffer.from(data, "utf-8").toString("base64"),
-      encoding: "base64",
-    })),
-    projectSettings: { framework: null },
-    target: "production",
-  };
+  const first = await deployOnce(token, teamId, name, phase1Files);
+  if (!first.ok) {
+    return NextResponse.json({ error: first.error, code: first.code }, { status: first.status });
+  }
 
-  const qs = teamId ? `?teamId=${encodeURIComponent(teamId)}` : "";
-  const vercelRes = await fetch(`https://api.vercel.com/v13/deployments${qs}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const realUrl = pickPublicUrl(first.data);
+  if (!realUrl) {
+    // Couldn't resolve a URL — fall back to returning phase-1 deployment as-is
+    return NextResponse.json({
+      url: null,
+      id: first.data.id ?? null,
+      alias: first.data.alias ?? [],
+      warning: "Deployment succeeded but no URL could be resolved; QR may be incorrect.",
+    });
+  }
 
-  const json: unknown = await vercelRes.json().catch(() => ({}));
-  if (!vercelRes.ok) {
-    const err = json as { error?: { message?: string; code?: string } };
+  // Phase 2 — regenerate HTML with the real URL baked into the QR, then redeploy
+  let phase2Files: Record<string, string>;
+  try {
+    phase2Files = await generateSite(profile, themeId, realUrl);
+  } catch (e) {
+    return NextResponse.json({ error: `Failed to regenerate site: ${String(e)}` }, { status: 500 });
+  }
+
+  const second = await deployOnce(token, teamId, name, phase2Files);
+  if (!second.ok) {
+    // Phase 1 is live but QR is wrong; surface the error so the user can retry.
     return NextResponse.json(
-      { error: err?.error?.message ?? `Vercel API error ${vercelRes.status}`, code: err?.error?.code },
-      { status: vercelRes.status }
+      {
+        error: `Phase 2 redeploy failed: ${second.error}`,
+        code: second.code,
+        url: realUrl,
+        warning: "Phase 1 deployed successfully, but QR URL could not be corrected.",
+      },
+      { status: second.status }
     );
   }
 
-  const data = json as { url?: string; id?: string; alias?: string[] };
-  const url = data.url ? `https://${data.url}` : null;
-  return NextResponse.json({ url, id: data.id ?? null, alias: data.alias ?? [] });
+  const finalUrl = pickPublicUrl(second.data) ?? realUrl;
+  return NextResponse.json({
+    url: finalUrl,
+    id: second.data.id ?? null,
+    alias: second.data.alias ?? [],
+    qrTarget: realUrl,
+  });
 }

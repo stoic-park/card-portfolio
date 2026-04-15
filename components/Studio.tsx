@@ -116,55 +116,71 @@ export function Studio() {
   const skillsCsv = useMemo(() => profile.skills.join(", "), [profile.skills]);
 
   return (
-    <main className="flex h-dvh flex-col bg-neutral-50 text-neutral-900">
-      <nav className="flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-6 py-3">
+    <main className="flex h-dvh flex-col" style={{ background: "var(--surface)", color: "var(--fg)" }}>
+      <nav
+        className="flex h-14 shrink-0 items-center justify-between px-6"
+        style={{ borderBottom: "1px solid var(--border)", background: "var(--bg)" }}
+      >
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm font-semibold">card-portfolio</Link>
-          <span className="text-xs text-neutral-400">/ Studio</span>
+          <Link href="/" className="text-sm font-semibold tracking-tight">card-portfolio</Link>
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em]" style={{ color: "var(--fg-subtle)" }}>
+            / Studio
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={onDownload} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">Download JSON</button>
-          <button onClick={onResetDefault} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">Reset</button>
-          <button onClick={onClear} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">Clear</button>
+        <div className="flex items-center gap-1.5">
+          <button onClick={onDownload} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+            Download JSON
+          </button>
+          <button onClick={onResetDefault} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+            Reset
+          </button>
+          <button onClick={onClear} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+            Clear
+          </button>
         </div>
       </nav>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2">
         {/* Input column */}
-        <section className="flex min-h-0 flex-col rounded-xl border border-neutral-200 bg-white">
-          <div className="flex shrink-0 border-b border-neutral-200">
-            {TABS.map((k) => (
-              <button
-                key={k.id}
-                onClick={() => setTab(k.id)}
-                className={`px-4 py-3 text-sm ${
-                  tab === k.id ? "border-b-2 border-neutral-900 font-semibold" : "text-neutral-500"
-                }`}
-              >
-                {k.label}
-              </button>
-            ))}
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]" style={{ border: "1px solid var(--border)" }}>
+          <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 px-2">
+            <div className="flex items-center">
+              {TABS.map((k) => (
+                <button
+                  key={k.id}
+                  onClick={() => setTab(k.id)}
+                  className={`relative px-4 py-2 text-sm transition ${
+                    tab === k.id ? "font-semibold text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
+                  }`}
+                >
+                  {k.label}
+                  {tab === k.id && <span className="absolute inset-x-2 -bottom-[14px] h-0.5 rounded-full bg-neutral-900" />}
+                </button>
+              ))}
+            </div>
+            {tab === "markdown" && (
+              <div className="flex items-center gap-1.5 pr-2">
+                <button onClick={() => fileRef.current?.click()} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">
+                  .md 업로드
+                </button>
+                <input ref={fileRef} type="file" accept=".md,.markdown,text/markdown,text/plain" className="hidden" onChange={onFileUpload} />
+                <button onClick={onParseMarkdown} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">
+                  파싱
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {tab === "markdown" && (
-              <div className="p-4">
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <button onClick={() => fileRef.current?.click()} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">
-                    .md 파일 업로드
-                  </button>
-                  <input ref={fileRef} type="file" accept=".md,.markdown,text/markdown,text/plain" className="hidden" onChange={onFileUpload} />
-                  <button onClick={onParseMarkdown} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">
-                    파싱
-                  </button>
-                  <span className="text-xs text-neutral-400">H1=이름, H2=섹션</span>
-                </div>
+              <div className="flex h-full flex-col p-4">
                 <textarea
                   value={mdText}
                   onChange={(e) => setMdText(e.target.value)}
                   placeholder={`# 이름\n\n## 소개\n한 줄 소개...\n\n## 경력 사항\n### 회사명 Role\n2024 ~ 재직중`}
-                  className="h-[calc(100%-44px)] min-h-[320px] w-full rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs leading-relaxed"
+                  className="min-h-[320px] w-full flex-1 rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs leading-relaxed"
                 />
+                <p className="mt-2 text-[11px] text-neutral-400">H1 = 이름 · H2 = 섹션 (소개 / 경력 사항 / 프로젝트 / 스킬)</p>
               </div>
             )}
 
@@ -236,28 +252,30 @@ export function Studio() {
         </section>
 
         {/* Preview column */}
-        <section className="flex min-h-0 flex-col rounded-xl border border-neutral-200 bg-white">
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-4 py-3">
-            <div className="flex items-center gap-2">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]" style={{ border: "1px solid var(--border)" }}>
+          <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-neutral-200 px-4">
+            <div className="flex items-center gap-3">
               <span className="text-sm font-semibold">Preview</span>
-              <button
-                onClick={() => onDownloadPng("front")}
-                className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-[11px] hover:bg-neutral-50"
-              >
-                앞면 PNG
-              </button>
-              <button
-                onClick={() => onDownloadPng("back")}
-                className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-[11px] hover:bg-neutral-50"
-              >
-                뒷면 PNG
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => onDownloadPng("front")}
+                  className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+                >
+                  앞면 PNG
+                </button>
+                <button
+                  onClick={() => onDownloadPng("back")}
+                  className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+                >
+                  뒷면 PNG
+                </button>
+              </div>
             </div>
             <ThemeSwitcher value={themeId} onChange={setThemeId} />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div
-              className="flex flex-col items-center gap-5 p-6"
+              className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-6 py-10"
               style={{ background: t.page.bg, color: t.page.text, fontFamily: resolveFontStack(profile.fontOverride, t.fontSans) }}
             >
               <BusinessCard themeId={themeId} qrDataUrl={qrDataUrl} profile={profile} />
@@ -267,7 +285,7 @@ export function Studio() {
               </p>
             </div>
             {profile.includeResume !== false && (
-              <div className="border-t border-neutral-200">
+              <div className="border-t border-neutral-200 bg-white">
                 <button
                   onClick={() => setShowResume((v) => !v)}
                   className="flex w-full items-center justify-between px-5 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"

@@ -118,14 +118,29 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
             className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 font-mono text-xs"
           />
         </label>
-        <label className="flex items-center gap-2 text-xs text-neutral-600">
-          <input
-            type="checkbox"
-            checked={rememberToken}
-            onChange={(e) => setRememberToken(e.target.checked)}
-          />
-          이 브라우저에 토큰 저장 (localStorage, 공용 PC에선 끄기)
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label className="flex items-center gap-2 text-xs text-neutral-600">
+            <input
+              type="checkbox"
+              checked={rememberToken}
+              onChange={(e) => setRememberToken(e.target.checked)}
+            />
+            이 브라우저에 토큰 저장 (localStorage, 공용 PC에선 끄기)
+          </label>
+          {token && (
+            <button
+              type="button"
+              onClick={() => {
+                setToken("");
+                setRememberToken(false);
+                if (typeof window !== "undefined") window.localStorage.removeItem(TOKEN_KEY);
+              }}
+              className="rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] text-neutral-700 hover:bg-neutral-50"
+            >
+              토큰 삭제 (로그아웃)
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="block">
