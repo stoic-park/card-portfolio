@@ -120,9 +120,18 @@ export async function generateSite(
   }
   a { color: inherit; }
   .card-scene {
-    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px;
+    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; overflow-x: hidden;
   }
-  .perspective { perspective: 1000px; width: 100%; max-width: 420px; }
+  .perspective { perspective: 1000px; width: 100%; max-width: 560px; }
+  @media (orientation: portrait) and (max-width: 640px) {
+    .card-scene { padding: 16px; gap: 16px; }
+    .perspective {
+      width: 82dvh;
+      max-width: none;
+      transform: rotate(90deg);
+      margin: calc((82dvh / 1.75 - 82dvh) / 2) 0;
+    }
+  }
   .card {
     position: relative; aspect-ratio: 1.75/1; transform-style: preserve-3d; transition: transform .7s ease; cursor: pointer; background: transparent; border: 0; padding: 0; width: 100%;
   }
@@ -132,7 +141,7 @@ export async function generateSite(
   }
   .face.front {
     background: var(--card-front-bg); color: var(--card-front-text); box-shadow: var(--card-front-shadow);
-    flex-direction: column; justify-content: space-between; text-align: left; position: relative;
+    flex-direction: column; justify-content: space-between; text-align: left;
   }
   .card-bg { position: absolute; inset: 0; background-repeat: no-repeat; }
   .card-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 100%); mix-blend-mode: multiply; pointer-events: none; }
