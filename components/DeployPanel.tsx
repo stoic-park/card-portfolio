@@ -92,16 +92,18 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
 
   return (
     <section className="rounded-xl border border-neutral-200 bg-white">
-      <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
-        <div>
+      <div className="flex flex-col gap-2 border-b border-neutral-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h2 className="text-sm font-semibold">Deploy to Vercel</h2>
-          <p className="text-xs text-neutral-500">자기 Vercel 계정의 Personal Access Token으로 배포합니다.</p>
+          <p className="text-xs leading-relaxed text-neutral-500">
+            자기 Vercel 계정의 Personal Access Token으로 배포합니다.
+          </p>
         </div>
         <a
           href="https://vercel.com/account/tokens"
           target="_blank"
           rel="noreferrer"
-          className="text-xs underline text-neutral-500 hover:text-neutral-900"
+          className="inline-flex shrink-0 items-center self-start text-xs font-medium text-neutral-500 underline hover:text-neutral-900 sm:self-auto"
         >
           토큰 발급 →
         </a>
