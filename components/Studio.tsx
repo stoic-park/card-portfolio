@@ -132,15 +132,9 @@ export function Studio() {
 
         {/* Desktop: all 3 actions inline */}
         <div className="hidden items-center gap-1.5 md:flex">
-          <button onClick={onDownload} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
-            Download JSON
-          </button>
-          <button onClick={onResetDefault} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
-            Reset
-          </button>
-          <button onClick={onClear} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
-            Clear
-          </button>
+          <button onClick={onDownload} className="btn btn-sm btn-secondary">Download JSON</button>
+          <button onClick={onResetDefault} className="btn btn-sm btn-secondary">Reset</button>
+          <button onClick={onClear} className="btn btn-sm btn-secondary">Clear</button>
         </div>
 
         {/* Mobile: overflow menu */}
@@ -150,8 +144,7 @@ export function Studio() {
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="메뉴"
             aria-expanded={menuOpen}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-lg leading-none"
-            style={{ border: "1px solid var(--border)", color: "var(--fg)" }}
+            className="btn btn-md btn-secondary btn-icon text-lg"
           >
             ⋯
           </button>
@@ -247,17 +240,11 @@ export function Studio() {
             {tab === "markdown" && (
               <div className="flex h-full flex-col p-3 sm:p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
-                  >
+                  <button onClick={() => fileRef.current?.click()} className="btn btn-sm btn-secondary">
                     .md 업로드
                   </button>
                   <input ref={fileRef} type="file" accept=".md,.markdown,text/markdown,text/plain" className="hidden" onChange={onFileUpload} />
-                  <button
-                    onClick={onParseMarkdown}
-                    className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800"
-                  >
+                  <button onClick={onParseMarkdown} className="btn btn-sm btn-primary">
                     파싱
                   </button>
                 </div>
@@ -347,16 +334,10 @@ export function Studio() {
             <div className="flex min-w-0 items-center gap-2">
               <span className="text-sm font-semibold">Preview</span>
               <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => onDownloadPng("front")}
-                  className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
-                >
+                <button onClick={() => onDownloadPng("front")} className="btn btn-sm btn-secondary">
                   앞면 PNG
                 </button>
-                <button
-                  onClick={() => onDownloadPng("back")}
-                  className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
-                >
+                <button onClick={() => onDownloadPng("back")} className="btn btn-sm btn-secondary">
                   뒷면 PNG
                 </button>
               </div>
@@ -424,9 +405,9 @@ function move<T>(arr: T[], from: number, to: number): T[] {
 function RowControls({ onUp, onDown, onDelete }: { onUp: () => void; onDown: () => void; onDelete: () => void }) {
   return (
     <div className="flex items-center gap-1">
-      <button type="button" onClick={onUp} aria-label="위로" className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200 text-sm hover:bg-neutral-50">↑</button>
-      <button type="button" onClick={onDown} aria-label="아래로" className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200 text-sm hover:bg-neutral-50">↓</button>
-      <button type="button" onClick={onDelete} aria-label="삭제" className="inline-flex h-10 w-10 items-center justify-center rounded border border-red-200 text-sm text-red-600 hover:bg-red-50">✕</button>
+      <button type="button" onClick={onUp} aria-label="위로" className="btn btn-sm btn-secondary btn-icon">↑</button>
+      <button type="button" onClick={onDown} aria-label="아래로" className="btn btn-sm btn-secondary btn-icon">↓</button>
+      <button type="button" onClick={onDelete} aria-label="삭제" className="btn btn-sm btn-danger btn-icon">✕</button>
     </div>
   );
 }
@@ -441,7 +422,7 @@ function ExperienceListEditor({ items, onChange }: { items: Experience[]; onChan
     <section className="space-y-3 border-t border-neutral-200 pt-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">경력 ({items.length})</h3>
-        <button type="button" onClick={add} className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800">+ 추가</button>
+        <button type="button" onClick={add} className="btn btn-sm btn-primary">+ 추가</button>
       </div>
       {items.length === 0 && (
         <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
@@ -465,11 +446,7 @@ function ExperienceListEditor({ items, onChange }: { items: Experience[]; onChan
         </div>
       ))}
       {items.length > 0 && (
-        <button
-          type="button"
-          onClick={add}
-          className="flex h-11 w-full items-center justify-center rounded-md border border-dashed border-neutral-300 text-xs font-medium text-neutral-600 hover:border-neutral-400 hover:bg-neutral-50"
-        >
+        <button type="button" onClick={add} className="btn btn-md btn-dashed w-full">
           + 경력 추가
         </button>
       )}
@@ -487,7 +464,7 @@ function ProjectListEditor({ items, onChange }: { items: Project[]; onChange: (n
     <section className="space-y-3 border-t border-neutral-200 pt-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">프로젝트 ({items.length})</h3>
-        <button type="button" onClick={add} className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800">+ 추가</button>
+        <button type="button" onClick={add} className="btn btn-sm btn-primary">+ 추가</button>
       </div>
       {items.length === 0 && (
         <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
@@ -524,11 +501,7 @@ function ProjectListEditor({ items, onChange }: { items: Project[]; onChange: (n
         </div>
       ))}
       {items.length > 0 && (
-        <button
-          type="button"
-          onClick={add}
-          className="flex h-11 w-full items-center justify-center rounded-md border border-dashed border-neutral-300 text-xs font-medium text-neutral-600 hover:border-neutral-400 hover:bg-neutral-50"
-        >
+        <button type="button" onClick={add} className="btn btn-md btn-dashed w-full">
           + 프로젝트 추가
         </button>
       )}

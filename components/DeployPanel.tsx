@@ -137,7 +137,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
                 setRememberToken(false);
                 if (typeof window !== "undefined") window.localStorage.removeItem(TOKEN_KEY);
               }}
-              className="rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] text-neutral-700 hover:bg-neutral-50"
+              className="btn btn-xs btn-secondary"
             >
               토큰 삭제 (로그아웃)
             </button>
@@ -244,7 +244,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
           <button
             onClick={onDeploy}
             disabled={state.kind === "deploying"}
-            className="rounded-md bg-black px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-50"
+            className="btn btn-md btn-primary"
           >
             {state.kind === "deploying" ? "배포 중..." : "▲ Deploy"}
           </button>

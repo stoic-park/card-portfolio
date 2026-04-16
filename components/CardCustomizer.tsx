@@ -77,18 +77,12 @@ export function CardCustomizer({ profile, themeId, onChange }: Props) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
-        >
+        <button onClick={() => fileRef.current?.click()} className="btn btn-sm btn-secondary">
           {current.image ? "이미지 교체" : "배경 이미지 업로드"}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
         {current.image && (
-          <button
-            onClick={() => update(undefined)}
-            className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
-          >
+          <button onClick={() => update(undefined)} className="btn btn-sm btn-danger">
             이미지 제거
           </button>
         )}
@@ -108,7 +102,7 @@ export function CardCustomizer({ profile, themeId, onChange }: Props) {
           <div className="flex gap-2">
             <button
               onClick={() => update({ ...defaultCardCustomization, image: current.image })}
-              className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+              className="btn btn-sm btn-secondary"
             >
               위치/크기 초기화
             </button>

@@ -37,16 +37,11 @@ export default function Home() {
             href="https://github.com/stoic-park/card-portfolio"
             target="_blank"
             rel="noreferrer"
-            className="hidden h-11 items-center rounded-md px-3 text-xs font-medium transition sm:inline-flex"
-            style={{ border: "1px solid var(--border)", color: "var(--fg)" }}
+            className="btn btn-md btn-secondary hidden sm:inline-flex"
           >
             GitHub
           </a>
-          <Link
-            href="/studio"
-            className="inline-flex h-11 items-center rounded-md px-3 text-xs font-semibold transition sm:px-4"
-            style={{ background: "var(--fg)", color: "var(--bg)" }}
-          >
+          <Link href="/studio" className="btn btn-md btn-primary">
             <span className="sm:hidden">스튜디오</span>
             <span className="hidden sm:inline">스튜디오 열기</span>
           </Link>
@@ -77,19 +72,14 @@ export default function Home() {
           QR 코드까지 자동 생성되는 미니멀 스튜디오.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link
-            href="/studio"
-            className="inline-flex h-11 w-full items-center justify-center rounded-md px-6 text-sm font-semibold transition hover:opacity-90 sm:w-auto"
-            style={{ background: "var(--fg)", color: "var(--bg)" }}
-          >
+          <Link href="/studio" className="btn btn-lg btn-primary w-full sm:w-auto">
             스튜디오 시작 →
           </Link>
           <a
             href="https://github.com/stoic-park/card-portfolio"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-11 w-full items-center justify-center rounded-md px-6 text-sm font-semibold transition hover:bg-[var(--surface-2)] sm:w-auto"
-            style={{ border: "1px solid var(--border-strong)", color: "var(--fg)" }}
+            className="btn btn-lg btn-secondary w-full sm:w-auto"
           >
             GitHub에서 보기
           </a>
