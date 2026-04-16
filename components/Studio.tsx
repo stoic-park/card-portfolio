@@ -464,6 +464,15 @@ function ExperienceListEditor({ items, onChange }: { items: Experience[]; onChan
           <Field label="설명"><textarea className="input min-h-[60px]" value={exp.desc} onChange={(e) => update(i, { desc: e.target.value })} /></Field>
         </div>
       ))}
+      {items.length > 0 && (
+        <button
+          type="button"
+          onClick={add}
+          className="flex h-11 w-full items-center justify-center rounded-md border border-dashed border-neutral-300 text-xs font-medium text-neutral-600 hover:border-neutral-400 hover:bg-neutral-50"
+        >
+          + 경력 추가
+        </button>
+      )}
     </section>
   );
 }
@@ -514,6 +523,15 @@ function ProjectListEditor({ items, onChange }: { items: Project[]; onChange: (n
           </Field>
         </div>
       ))}
+      {items.length > 0 && (
+        <button
+          type="button"
+          onClick={add}
+          className="flex h-11 w-full items-center justify-center rounded-md border border-dashed border-neutral-300 text-xs font-medium text-neutral-600 hover:border-neutral-400 hover:bg-neutral-50"
+        >
+          + 프로젝트 추가
+        </button>
+      )}
     </section>
   );
 }
