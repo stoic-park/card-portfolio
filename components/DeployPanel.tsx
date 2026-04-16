@@ -115,7 +115,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
             value={token}
             onChange={(e) => setToken(e.target.value)}
             placeholder="vercel_XXXXXXXXXXXX"
-            className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 font-mono text-xs"
+            className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 font-mono text-base"
           />
         </label>
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -149,7 +149,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
               value={profile.projectName ?? ""}
               onChange={(e) => setProjectName(e.target.value)}
               placeholder="my-card"
-              className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-base"
             />
             <span className="mt-1 block text-[11px] text-neutral-500">
               예상 URL: <span className="font-mono">{predictedUrl}</span>
@@ -161,7 +161,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
               value={teamId}
               onChange={(e) => setTeamId(e.target.value)}
               placeholder="team_xxx (개인 계정은 비워두세요)"
-              className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-base"
             />
           </label>
         </div>
@@ -213,7 +213,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
                     placeholder="https://..."
                     value={qr.customUrl ?? ""}
                     onChange={(e) => setQrCustomUrl(e.target.value)}
-                    className="mt-1.5 w-full rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-xs"
+                    className="mt-1.5 w-full rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-base"
                   />
                 )}
               </div>

@@ -120,16 +120,18 @@ export async function generateSite(
   }
   a { color: inherit; }
   .card-scene {
-    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; overflow-x: hidden;
+    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; overflow-x: clip;
   }
   .perspective { perspective: 1000px; width: 100%; max-width: 560px; }
   @media (orientation: portrait) and (max-width: 640px) {
     .card-scene { padding: 16px; gap: 16px; }
     .perspective {
-      width: 82dvh;
+      /* Rotated width must yield visual width <= 92vw (rotated width = pre / 1.75) */
+      --rot-w: min(82dvh, calc(92vw * 1.75));
+      width: var(--rot-w);
       max-width: none;
       transform: rotate(90deg);
-      margin: calc((82dvh / 1.75 - 82dvh) / 2) 0;
+      margin: calc((var(--rot-w) / 1.75 - var(--rot-w)) / 2) 0;
     }
   }
   .card {
@@ -161,21 +163,31 @@ export async function generateSite(
   .back-info { flex: 1; min-width: 0; }
   .back-eyebrow { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--card-back-muted); }
   .back-primary { margin: 4px 0 2px; font-size: 14px; font-weight: 600; }
-  .back-sub { margin: 0; font-size: 12px; color: var(--card-back-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .scroll-hint { font-size: 12px; color: var(--page-muted); text-decoration: none; }
-  .scroll-hint:hover { color: var(--page-accent); }
-  .resume {
-    max-width: 720px; margin: 0 auto; padding: 64px 24px 96px;
+  .back-sub {
+    margin: 0; font-size: 12px; color: var(--card-back-muted);
+    overflow: hidden; text-overflow: ellipsis; overflow-wrap: anywhere; word-break: break-word;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1;
   }
-  .resume h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
-  .resume .lede { margin: 8px 0 20px; font-size: 18px; color: var(--page-muted); }
+  .scroll-hint {
+    font-size: 13px; color: var(--page-muted); text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; padding: 0 16px; border-radius: 999px;
+  }
+  .scroll-hint:hover { color: var(--page-accent); background: color-mix(in srgb, var(--page-muted) 8%, transparent); }
+  .resume {
+    max-width: 720px; margin: 0 auto;
+    padding: clamp(32px, 6vw, 64px) clamp(16px, 4vw, 24px) clamp(48px, 8vw, 96px);
+    overflow-wrap: anywhere;
+  }
+  .resume h1 { font-size: clamp(28px, 6vw, 36px); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  .resume .lede { margin: 8px 0 20px; font-size: clamp(15px, 2.5vw, 18px); color: var(--page-muted); }
   .resume h2 { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--page-muted); font-weight: 600; margin: 36px 0 14px; }
-  .resume h3 { margin: 0; font-size: 17px; font-weight: 600; }
-  .resume p { margin: 6px 0; }
+  .resume h3 { margin: 0; font-size: clamp(15px, 2.4vw, 17px); font-weight: 600; }
+  .resume p { margin: 6px 0; font-size: 15px; line-height: 1.55; }
   .hint { font-size: 12px; color: var(--page-muted); margin: 12px 0 0; }
-  .socials { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .socials { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .socials a {
-    display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--page-muted) 30%, transparent); color: var(--page-text); transition: transform .15s ease;
   }
   .socials a:hover { transform: scale(1.06); color: var(--page-accent); }

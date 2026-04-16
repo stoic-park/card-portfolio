@@ -19,7 +19,8 @@ function clamp(v: number, lo: number, hi: number) {
 type Drag =
   | { kind: "none" }
   | { kind: "move"; startX: number; startY: number; initX: number; initY: number; w: number; h: number }
-  | { kind: "scale"; startX: number; startY: number; initScale: number; w: number };
+  | { kind: "scale"; startX: number; startY: number; initScale: number; w: number }
+  | { kind: "pinch" };
 
 export function CardEditor({ profile, themeId, customization, onChange, side = "front" }: Props) {
   const t = themes[themeId];
@@ -28,13 +29,35 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
   const [drag, setDrag] = useState<Drag>({ kind: "none" });
   const [hover, setHover] = useState(false);
 
+  // Multi-touch tracking for pinch zoom
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ initialDist: number; initialScale: number } | null>(null);
+
   const hasImage = !!customization.image;
+
+  function currentPointerDistance(): number {
+    const pts = [...pointersRef.current.values()];
+    if (pts.length < 2) return 0;
+    return Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+  }
 
   useEffect(() => {
     if (drag.kind === "none") return;
 
     function onMove(e: PointerEvent) {
       e.preventDefault();
+      if (pointersRef.current.has(e.pointerId)) {
+        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      }
+
+      if (drag.kind === "pinch" && pinchRef.current && pointersRef.current.size >= 2) {
+        const dist = currentPointerDistance();
+        if (!dist) return;
+        const ratio = dist / pinchRef.current.initialDist;
+        const next = clamp(pinchRef.current.initialScale * ratio, 0.5, 3);
+        onChange({ ...customization, scale: next });
+        return;
+      }
       if (drag.kind === "move") {
         const dx = ((e.clientX - drag.startX) / drag.w) * 100;
         const dy = ((e.clientY - drag.startY) / drag.h) * 100;
@@ -49,21 +72,45 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
         onChange({ ...customization, scale: next });
       }
     }
-    function onUp() {
+    function onUp(e: PointerEvent) {
+      pointersRef.current.delete(e.pointerId);
+      if (drag.kind === "pinch") {
+        if (pointersRef.current.size < 2) {
+          pinchRef.current = null;
+          setDrag({ kind: "none" });
+        }
+        return;
+      }
+      setDrag({ kind: "none" });
+    }
+    function onCancel(e: PointerEvent) {
+      pointersRef.current.delete(e.pointerId);
+      pinchRef.current = null;
       setDrag({ kind: "none" });
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
+    window.addEventListener("pointercancel", onCancel);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointercancel", onCancel);
     };
   }, [drag, customization, onChange]);
 
-  function startMove(e: React.PointerEvent) {
+  function onCanvasPointerDown(e: React.PointerEvent) {
     if (!hasImage) return;
+    if (drag.kind === "scale") return; // scale-handle drag owns the pointer
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size >= 2) {
+      const dist = currentPointerDistance();
+      if (!dist) return;
+      pinchRef.current = { initialDist: dist, initialScale: customization.scale };
+      setDrag({ kind: "pinch" });
+      return;
+    }
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
     setDrag({
@@ -102,10 +149,10 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
     <div className="mx-auto w-full max-w-[420px]">
       <div
         ref={canvasRef}
-        onPointerDown={startMove}
+        onPointerDown={onCanvasPointerDown}
         onWheel={onWheel}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onPointerEnter={() => setHover(true)}
+        onPointerLeave={() => setHover(false)}
         className="relative overflow-hidden rounded-2xl select-none touch-none"
         style={{
           aspectRatio: "1.75 / 1",
@@ -175,15 +222,17 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
           </div>
         )}
 
-        {/* Scale handle */}
+        {/* Scale handle — 44x44 hit area with 24px visible dot */}
         {hasImage && (
           <button
             type="button"
             onPointerDown={startScale}
             aria-label="크기 조정 핸들"
-            className="absolute bottom-2 right-2 z-20 h-5 w-5 rounded-full border-2 border-white bg-black/70 cursor-nwse-resize"
-            style={{ touchAction: "none" }}
-          />
+            className="absolute bottom-0 right-0 z-20 flex h-11 w-11 items-end justify-end p-1.5"
+            style={{ touchAction: "none", cursor: "nwse-resize" }}
+          >
+            <span className="h-6 w-6 rounded-full border-2 border-white bg-black/70 shadow-md" aria-hidden />
+          </button>
         )}
 
         {/* Drop hint */}
@@ -209,7 +258,7 @@ export function CardEditor({ profile, themeId, customization, onChange, side = "
         )}
       </div>
       <p className="mt-2 text-center text-xs text-neutral-500">
-        드래그 = 위치 · 휠/우하단 핸들 드래그 = 크기
+        드래그 = 위치 · 휠·핀치·우하단 핸들 = 크기
       </p>
     </div>
   );

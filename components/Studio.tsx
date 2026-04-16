@@ -35,6 +35,8 @@ export function Studio() {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
   const [showResume, setShowResume] = useState(false);
+  const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
+  const [menuOpen, setMenuOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const exportFrontRef = useRef<HTMLDivElement>(null);
   const exportBackRef = useRef<HTMLDivElement>(null);
@@ -118,67 +120,152 @@ export function Studio() {
   return (
     <main className="flex h-dvh flex-col" style={{ background: "var(--surface)", color: "var(--fg)" }}>
       <nav
-        className="flex h-14 shrink-0 items-center justify-between px-6"
+        className="flex h-14 shrink-0 items-center justify-between gap-3 px-4 sm:px-6"
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg)" }}
       >
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm font-semibold tracking-tight">card-portfolio</Link>
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em]" style={{ color: "var(--fg-subtle)" }}>
+        <div className="flex min-w-0 items-center gap-3">
+          <Link href="/" className="truncate text-sm font-semibold tracking-tight">card-portfolio</Link>
+          <span className="hidden font-mono text-[11px] uppercase tracking-[0.22em] sm:inline" style={{ color: "var(--fg-subtle)" }}>
             / Studio
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button onClick={onDownload} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+
+        {/* Desktop: all 3 actions inline */}
+        <div className="hidden items-center gap-1.5 md:flex">
+          <button onClick={onDownload} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
             Download JSON
           </button>
-          <button onClick={onResetDefault} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+          <button onClick={onResetDefault} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
             Reset
           </button>
-          <button onClick={onClear} className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
+          <button onClick={onClear} className="inline-flex h-10 items-center rounded-md px-3 text-xs font-medium transition hover:bg-[var(--surface-2)]" style={{ border: "1px solid var(--border)", color: "var(--fg)" }}>
             Clear
           </button>
         </div>
-      </nav>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2">
-        {/* Input column */}
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]" style={{ border: "1px solid var(--border)" }}>
-          <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 px-2">
-            <div className="flex items-center">
-              {TABS.map((k) => (
+        {/* Mobile: overflow menu */}
+        <div className="relative md:hidden">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="메뉴"
+            aria-expanded={menuOpen}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-lg leading-none"
+            style={{ border: "1px solid var(--border)", color: "var(--fg)" }}
+          >
+            ⋯
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div
+                role="menu"
+                className="absolute right-0 top-12 z-20 flex min-w-[180px] flex-col rounded-md bg-white py-1 shadow-[var(--shadow-md)]"
+                style={{ border: "1px solid var(--border)" }}
+              >
                 <button
-                  key={k.id}
-                  onClick={() => setTab(k.id)}
-                  className={`relative px-4 py-2 text-sm transition ${
-                    tab === k.id ? "font-semibold text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
-                  }`}
+                  role="menuitem"
+                  onClick={() => { onDownload(); setMenuOpen(false); }}
+                  className="flex h-11 items-center px-4 text-left text-sm hover:bg-[var(--surface-2)]"
                 >
-                  {k.label}
-                  {tab === k.id && <span className="absolute inset-x-2 -bottom-[14px] h-0.5 rounded-full bg-neutral-900" />}
+                  Download JSON
                 </button>
-              ))}
-            </div>
-            {tab === "markdown" && (
-              <div className="flex items-center gap-1.5 pr-2">
-                <button onClick={() => fileRef.current?.click()} className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50">
-                  .md 업로드
+                <button
+                  role="menuitem"
+                  onClick={() => { onResetDefault(); setMenuOpen(false); }}
+                  className="flex h-11 items-center px-4 text-left text-sm hover:bg-[var(--surface-2)]"
+                >
+                  Reset (기본값)
                 </button>
-                <input ref={fileRef} type="file" accept=".md,.markdown,text/markdown,text/plain" className="hidden" onChange={onFileUpload} />
-                <button onClick={onParseMarkdown} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">
-                  파싱
+                <button
+                  role="menuitem"
+                  onClick={() => { onClear(); setMenuOpen(false); }}
+                  className="flex h-11 items-center px-4 text-left text-sm text-red-600 hover:bg-[var(--surface-2)]"
+                >
+                  Clear (전체 삭제)
                 </button>
               </div>
-            )}
+            </>
+          )}
+        </div>
+      </nav>
+
+      {/* Mobile-only Editor/Preview toggle */}
+      <div className="flex shrink-0 items-stretch lg:hidden" style={{ borderBottom: "1px solid var(--border)" }} role="tablist" aria-label="뷰 전환">
+        <button
+          role="tab"
+          aria-selected={mobileView === "editor"}
+          onClick={() => setMobileView("editor")}
+          className={`h-11 flex-1 text-sm font-medium transition ${
+            mobileView === "editor"
+              ? "bg-[var(--fg)] text-[var(--bg)]"
+              : "bg-white text-[var(--fg-muted)] hover:bg-[var(--surface-2)]"
+          }`}
+        >
+          편집
+        </button>
+        <button
+          role="tab"
+          aria-selected={mobileView === "preview"}
+          onClick={() => setMobileView("preview")}
+          className={`h-11 flex-1 text-sm font-medium transition ${
+            mobileView === "preview"
+              ? "bg-[var(--fg)] text-[var(--bg)]"
+              : "bg-white text-[var(--fg-muted)] hover:bg-[var(--surface-2)]"
+          }`}
+          style={{ borderLeft: "1px solid var(--border)" }}
+        >
+          프리뷰
+        </button>
+      </div>
+
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 sm:gap-4 sm:p-4 lg:grid-cols-2">
+        {/* Input column */}
+        <section
+          className={`${mobileView === "editor" ? "flex" : "hidden"} min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)] lg:flex`}
+          style={{ border: "1px solid var(--border)" }}
+        >
+          <div className="flex h-12 shrink-0 items-center overflow-x-auto border-b border-neutral-200" role="tablist" aria-label="편집 영역">
+            {TABS.map((k) => (
+              <button
+                key={k.id}
+                role="tab"
+                aria-selected={tab === k.id}
+                onClick={() => setTab(k.id)}
+                className={`inline-flex h-full shrink-0 items-center border-b-2 px-3 text-sm transition sm:px-4 ${
+                  tab === k.id
+                    ? "border-neutral-900 font-semibold text-neutral-900"
+                    : "border-transparent text-neutral-500 hover:text-neutral-800"
+                }`}
+              >
+                {k.label}
+              </button>
+            ))}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {tab === "markdown" && (
-              <div className="flex h-full flex-col p-4">
+              <div className="flex h-full flex-col p-3 sm:p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
+                  >
+                    .md 업로드
+                  </button>
+                  <input ref={fileRef} type="file" accept=".md,.markdown,text/markdown,text/plain" className="hidden" onChange={onFileUpload} />
+                  <button
+                    onClick={onParseMarkdown}
+                    className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800"
+                  >
+                    파싱
+                  </button>
+                </div>
                 <textarea
                   value={mdText}
                   onChange={(e) => setMdText(e.target.value)}
                   placeholder={`# 이름\n\n## 소개\n한 줄 소개...\n\n## 경력 사항\n### 회사명 Role\n2024 ~ 재직중`}
-                  className="min-h-[320px] w-full flex-1 rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs leading-relaxed"
+                  className="min-h-[50vh] w-full flex-1 rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-base leading-relaxed"
                 />
                 <p className="mt-2 text-[11px] text-neutral-400">H1 = 이름 · H2 = 섹션 (소개 / 경력 사항 / 프로젝트 / 스킬)</p>
               </div>
@@ -252,20 +339,23 @@ export function Studio() {
         </section>
 
         {/* Preview column */}
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]" style={{ border: "1px solid var(--border)" }}>
-          <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-neutral-200 px-4">
-            <div className="flex items-center gap-3">
+        <section
+          className={`${mobileView === "preview" ? "flex" : "hidden"} min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)] lg:flex`}
+          style={{ border: "1px solid var(--border)" }}
+        >
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-3 py-2 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2">
               <span className="text-sm font-semibold">Preview</span>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => onDownloadPng("front")}
-                  className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+                  className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
                 >
                   앞면 PNG
                 </button>
                 <button
                   onClick={() => onDownloadPng("back")}
-                  className="rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs hover:bg-neutral-50"
+                  className="inline-flex h-10 items-center rounded-md border border-neutral-200 bg-white px-3 text-xs hover:bg-neutral-50"
                 >
                   뒷면 PNG
                 </button>
@@ -275,7 +365,7 @@ export function Studio() {
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div
-              className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-6 py-10"
+              className="flex min-h-[50vh] flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 sm:py-10"
               style={{ background: t.page.bg, color: t.page.text, fontFamily: resolveFontStack(profile.fontOverride, t.fontSans) }}
             >
               <BusinessCard themeId={themeId} qrDataUrl={qrDataUrl} profile={profile} />
@@ -288,7 +378,7 @@ export function Studio() {
               <div className="border-t border-neutral-200 bg-white">
                 <button
                   onClick={() => setShowResume((v) => !v)}
-                  className="flex w-full items-center justify-between px-5 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                  className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 sm:px-5"
                 >
                   <span>이력 미리보기</span>
                   <span className="text-xs text-neutral-500">{showResume ? "▲ 접기" : "▼ 펼치기"}</span>
@@ -310,17 +400,6 @@ export function Studio() {
         </div>
       </div>
 
-      <style jsx>{`
-        .input {
-          width: 100%;
-          border: 1px solid #e5e5e5;
-          border-radius: 6px;
-          padding: 8px 10px;
-          font-size: 14px;
-          background: #fafafa;
-        }
-        .input:focus { outline: none; border-color: #0070f3; background: #fff; }
-      `}</style>
     </main>
   );
 }
@@ -345,9 +424,9 @@ function move<T>(arr: T[], from: number, to: number): T[] {
 function RowControls({ onUp, onDown, onDelete }: { onUp: () => void; onDown: () => void; onDelete: () => void }) {
   return (
     <div className="flex items-center gap-1">
-      <button type="button" onClick={onUp} aria-label="위로" className="h-7 w-7 rounded border border-neutral-200 text-xs hover:bg-neutral-50">↑</button>
-      <button type="button" onClick={onDown} aria-label="아래로" className="h-7 w-7 rounded border border-neutral-200 text-xs hover:bg-neutral-50">↓</button>
-      <button type="button" onClick={onDelete} aria-label="삭제" className="h-7 w-7 rounded border border-red-200 text-xs text-red-600 hover:bg-red-50">✕</button>
+      <button type="button" onClick={onUp} aria-label="위로" className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200 text-sm hover:bg-neutral-50">↑</button>
+      <button type="button" onClick={onDown} aria-label="아래로" className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200 text-sm hover:bg-neutral-50">↓</button>
+      <button type="button" onClick={onDelete} aria-label="삭제" className="inline-flex h-10 w-10 items-center justify-center rounded border border-red-200 text-sm text-red-600 hover:bg-red-50">✕</button>
     </div>
   );
 }
@@ -362,7 +441,7 @@ function ExperienceListEditor({ items, onChange }: { items: Experience[]; onChan
     <section className="space-y-3 border-t border-neutral-200 pt-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">경력 ({items.length})</h3>
-        <button type="button" onClick={add} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">+ 추가</button>
+        <button type="button" onClick={add} className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800">+ 추가</button>
       </div>
       {items.length === 0 && (
         <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
@@ -399,7 +478,7 @@ function ProjectListEditor({ items, onChange }: { items: Project[]; onChange: (n
     <section className="space-y-3 border-t border-neutral-200 pt-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">프로젝트 ({items.length})</h3>
-        <button type="button" onClick={add} className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white hover:bg-neutral-800">+ 추가</button>
+        <button type="button" onClick={add} className="inline-flex h-10 items-center rounded-md bg-neutral-900 px-3 text-xs font-medium text-white hover:bg-neutral-800">+ 추가</button>
       </div>
       {items.length === 0 && (
         <p className="text-xs text-neutral-400">항목이 없습니다. "+ 추가" 또는 Markdown 탭에서 불러오세요.</p>
