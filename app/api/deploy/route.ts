@@ -90,7 +90,7 @@ async function deployOnce(
   return { ok: true, data: json as DeploymentResponse };
 }
 
-function pickPublicUrl(data: DeploymentResponse, projectName?: string): string | null {
+function pickPublicUrl(data: DeploymentResponse): string | null {
   const aliases = (data.alias ?? []).filter((a) => typeof a === "string" && a.length > 0);
   // Deployment-specific URLs contain a long alphanumeric hash segment between the
   // project name and the team slug. Production aliases do not. Prefer the latter.
@@ -101,7 +101,6 @@ function pickPublicUrl(data: DeploymentResponse, projectName?: string): string |
     const shortest = pool.slice().sort((a, b) => a.length - b.length)[0];
     return `https://${shortest}`;
   }
-  if (projectName) return `https://${projectName}.vercel.app`;
   return data.url ? `https://${data.url}` : null;
 }
 
@@ -146,7 +145,7 @@ export async function POST(req: Request) {
     ],
   };
 
-  const realUrl = pickPublicUrl(merged, name);
+  const realUrl = pickPublicUrl(merged);
   if (!realUrl) {
     // Couldn't resolve a URL — fall back to returning phase-1 deployment as-is
     return NextResponse.json({
@@ -179,7 +178,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const finalUrl = pickPublicUrl(second.data, name) ?? realUrl;
+  const finalUrl = pickPublicUrl(second.data) ?? realUrl;
   return NextResponse.json({
     url: finalUrl,
     id: second.data.id ?? null,
