@@ -122,9 +122,20 @@ export async function generateSite(
   }
   a { color: inherit; }
   .card-scene {
-    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; overflow-x: clip;
+    min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; overflow-x: clip; position: relative;
   }
-  .perspective { perspective: 1000px; width: 100%; max-width: 560px; }
+  .card-glow {
+    position: absolute; top: 50%; left: 50%;
+    width: min(55vw, 400px); height: min(55vw, 400px);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, ${t.page.accent} 0%, transparent 100%);
+    filter: blur(80px);
+    opacity: ${isDark ? 0.30 : 0.20};
+    pointer-events: none;
+    z-index: 0;
+  }
+  .perspective { perspective: 1000px; width: 100%; max-width: 560px; position: relative; z-index: 1; }
   @media (orientation: portrait) and (max-width: 640px) {
     .card-scene { padding: 16px; gap: 16px; }
     .perspective {
@@ -173,7 +184,7 @@ export async function generateSite(
   .scroll-hint {
     font-size: 13px; color: var(--page-muted); text-decoration: none;
     display: inline-flex; align-items: center; justify-content: center;
-    min-height: 44px; padding: 0 16px; border-radius: 999px;
+    min-height: 44px; padding: 0 16px; border-radius: 999px; position: relative; z-index: 1;
   }
   .scroll-hint:hover { color: var(--page-accent); background: color-mix(in srgb, var(--page-muted) 8%, transparent); }
   .resume {
@@ -203,7 +214,7 @@ export async function generateSite(
   .item .period { margin-left: auto; font-size: 12px; }
   .bullets { margin: 10px 0 0; padding-left: 20px; font-size: 14px; }
   .bullets li { margin: 4px 0; }
-  .signature { font-size: 11px; color: var(--page-muted); text-align: center; }
+  .signature { font-size: 11px; color: var(--page-muted); text-align: center; position: relative; z-index: 1; }
   .signature b { color: var(--page-accent); font-weight: 500; }
   `;
 
@@ -227,6 +238,7 @@ ${collectFontImports(profile.fontOverride).map((u) => `<link rel="stylesheet" hr
 </head>
 <body>
 <section class="card-scene">
+  <div class="card-glow"></div>
   <div class="perspective">
     <button class="card" id="card" type="button" aria-label="명함 뒤집기">
       <div class="face front">
