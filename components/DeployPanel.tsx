@@ -229,7 +229,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
           <span className="text-neutral-500">배포 테마:</span>
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-medium"
