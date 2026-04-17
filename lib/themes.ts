@@ -102,7 +102,7 @@ export const themes: Record<ThemeId, Theme> = {
         text: "#f7f8f8",
         muted: "#8a8f98",
         accent: "#a5b4fc",
-        shadow: "0 0 0 1px rgba(255,255,255,0.08), 0 20px 50px -20px rgba(94,106,210,0.5)",
+        shadow: "0 0 0 1px rgba(255,255,255,0.18), 0 20px 50px -20px rgba(94,106,210,0.5), 0 0 60px -10px rgba(94,106,210,0.3)",
       },
       back: {
         bg: "#5e6ad2",
@@ -134,7 +134,7 @@ export const themes: Record<ThemeId, Theme> = {
         shadow: "0 1px 2px rgba(15,15,15,0.06), 0 12px 32px -12px rgba(15,15,15,0.16)",
       },
       back: {
-        bg: "#f6f5f4",
+        bg: "#ffffff",
         text: "#1f1f1f",
         muted: "#615d59",
         accent: "#0075de",
@@ -167,7 +167,7 @@ export const themes: Record<ThemeId, Theme> = {
         text: "#ffffff",
         muted: "#b3b3b3",
         accent: "#1ed760",
-        shadow: "0 0 0 1px rgba(255,255,255,0.06), 0 24px 48px -12px rgba(0,0,0,0.6)",
+        shadow: "0 0 0 1px rgba(255,255,255,0.15), 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 60px -10px rgba(30,215,96,0.12)",
       },
       qrBg: "#ffffff",
     },
