@@ -131,7 +131,7 @@ export async function generateSite(
       width: var(--rot-w);
       max-width: none;
       transform: rotate(90deg);
-      margin: calc((var(--rot-w) / 1.75 - var(--rot-w)) / 2) 0;
+      margin: calc((var(--rot-w) - var(--rot-w) / 1.75) / 2) 0;
     }
   }
   .card {
