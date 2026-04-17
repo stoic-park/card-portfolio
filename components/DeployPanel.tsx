@@ -188,7 +188,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
           <div className="flex flex-col gap-1.5">
             <label className="flex items-center gap-2">
               <input type="radio" checked={qr.mode === "site"} onChange={() => setQrMode("site")} />
-              <span>배포 사이트 루트 <span className="font-mono text-[11px]">{predictedUrl}</span></span>
+              <span>배포 사이트 루트 <span className="break-all font-mono text-[11px]">{predictedUrl}</span></span>
             </label>
             <label className={`flex items-center gap-2 ${!includeResume ? "opacity-50" : ""}`}>
               <input
@@ -197,7 +197,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
                 onChange={() => setQrMode("siteAnchor")}
                 disabled={!includeResume}
               />
-              <span>배포 사이트 이력 앵커 <span className="font-mono text-[11px]">{predictedUrl}/#resume</span>
+              <span>배포 사이트 이력 앵커 <span className="break-all font-mono text-[11px]">{predictedUrl}/#resume</span>
               {!includeResume && <span className="ml-1 text-neutral-400">(이력 미포함이라 비활성)</span>}</span>
             </label>
             <label className="flex items-start gap-2">
@@ -222,7 +222,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
             </label>
           </div>
           <p className="mt-2 text-[11px] text-neutral-500">
-            현재 QR: <span className="font-mono">{resolveQrUrl(profile)}</span>
+            현재 QR: <span className="break-all font-mono">{resolveQrUrl(profile)}</span>
           </p>
           <p className="mt-1 text-[11px] text-neutral-400">
             ※ Vercel production alias는 프로젝트 이름 기반 ({slug}.vercel.app)이라 배포 전에도 정확한 URL로 QR을 미리 만들 수 있습니다. 단, 이미 점유된 이름이면 Vercel이 접미어를 붙일 수 있어요.
@@ -249,7 +249,7 @@ export function DeployPanel({ profile, themeId, onProfileChange }: DeployPanelPr
             {state.kind === "deploying" ? "배포 중..." : "▲ Deploy"}
           </button>
           {state.kind === "success" && (
-            <a href={state.url} target="_blank" rel="noreferrer" className="text-xs text-green-700 underline">
+            <a href={state.url} target="_blank" rel="noreferrer" className="break-all text-xs text-green-700 underline">
               {state.url}
             </a>
           )}
