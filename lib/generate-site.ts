@@ -85,7 +85,7 @@ export async function generateSite(
   qrTargetUrl: string
 ): Promise<Record<string, string>> {
   const t = themes[themeId];
-  const isDark = themeId === "linear" || themeId === "spotify";
+  const isDark = t.isDark ?? false;
   const qr = await QRCode.toDataURL(qrTargetUrl, {
     margin: 1,
     width: 320,
@@ -109,6 +109,7 @@ export async function generateSite(
     --card-back-accent: ${t.card.back.accent};
     --card-back-shadow: ${t.card.back.shadow};
     --qr-bg: ${t.card.qrBg};
+    color-scheme: ${isDark ? "dark" : "light"};
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -118,7 +119,6 @@ export async function generateSite(
     font-family: ${resolveFontStack(profile.fontOverride, t.fontSans)};
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
-    color-scheme: ${isDark ? "dark" : "light"};
   }
   a { color: inherit; }
   .card-scene {

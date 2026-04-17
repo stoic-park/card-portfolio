@@ -13,6 +13,7 @@ export type Theme = {
   label: string;
   signature: string;
   fontSans: string;
+  isDark?: boolean;
   page: {
     bg: string;
     text: string;
@@ -90,6 +91,7 @@ export const themes: Record<ThemeId, Theme> = {
     label: "Linear",
     signature: "Dark-native, weight-510 precision",
     fontSans: "'Inter Variable', Inter, system-ui, sans-serif",
+    isDark: true,
     page: {
       bg: "#08090a",
       text: "#f7f8f8",
@@ -148,6 +150,7 @@ export const themes: Record<ThemeId, Theme> = {
     label: "Spotify",
     signature: "Pill geometry, vivid green accent",
     fontSans: "'Inter Variable', system-ui, sans-serif",
+    isDark: true,
     page: {
       bg: "#121212",
       text: "#ffffff",
